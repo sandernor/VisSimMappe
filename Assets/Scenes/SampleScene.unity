@@ -552,9 +552,9 @@ GameObject:
   - component: {fileID: 1395056461}
   - component: {fileID: 1395056462}
   - component: {fileID: 1395056463}
-  - component: {fileID: 1395056466}
   - component: {fileID: 1395056465}
   - component: {fileID: 1395056464}
+  - component: {fileID: 1395056466}
   m_Layer: 0
   m_Name: PointGen
   m_TagString: Untagged
@@ -665,7 +665,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1395056459}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 352ba955e1d412043a6fad53fcfa9a90, type: 3}
+  m_Script: {fileID: 11500000, guid: ce69a4550b253bb4084c52d7c9db80b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _material: {fileID: 0}
