@@ -24,7 +24,7 @@ public class Triangulation : MonoBehaviour
     private Vector3 v;
 
     private int numVertices;
-    private int multi = 250;
+    private int multi = 1000;
     private float scale = 1f;
 
     private float xMax = 0f;
@@ -41,7 +41,7 @@ public class Triangulation : MonoBehaviour
     private float zMax2 = 6673700f;
     private float yMax2 = 600f;
 
-    private float Res = 62f;
+    private float Res = 25f;
 
     private float[] xArr;
     private float[] zArr;
@@ -86,6 +86,7 @@ public class Triangulation : MonoBehaviour
 
         var j = gridSize - n - (m - 1);
         vertexArray = new Vector3[j];
+        Debug.Log(vertexArray.Length);
         uvs = new Vector2[j];
         tris = 2 * (gridSize - (2 * n) - (2 * (m - 2)));
         triVerts = new int[tris * 3];
@@ -208,7 +209,8 @@ public class Triangulation : MonoBehaviour
                 {
                     yV += points4[i].y;
                 }
-                yV = yV / points4.Count;
+                yV = points4.Count > 0 ? yV / points4.Count : prev;
+                Debug.Log(yV);
 
                 if (yV == 0)
                 {
@@ -290,12 +292,14 @@ public class Triangulation : MonoBehaviour
         for (int i = 0; i < vertexArray.Length; i++)
         {
             uvs[i] = new Vector2((vertexArray[i].x / (xMax - xMin)) * Res, (vertexArray[i].z / (zMax - zMin)) * Res);
+            //vertexArray[i] *= 0.5f;   
         }
         mesh.Clear();
         mesh.vertices = vertexArray;
         mesh.triangles = triVerts;
         mesh.uv = uvs;
         mesh.normals = CalcVNormals();
+
     }
 
     private void Update()
