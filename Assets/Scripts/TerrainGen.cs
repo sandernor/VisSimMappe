@@ -19,7 +19,7 @@ public class TerrainGen : MonoBehaviour
 
     private List<string> line;
     private int lineCount = 0;
-    private Vector3[] vertexArray;
+    public Vector3[] vertexArray;
     private Vector2[] uvs;
     private Vector3 v;
 
@@ -51,19 +51,38 @@ public class TerrainGen : MonoBehaviour
     private int n;
     private int m;
     private int gridSize;
-    private int tris;
+    private int triangles;
 
-    private Triangle[] triangles;
+    public Triangle[] tris;
 
     public struct Triangle
     {
+        public int index;
+
         public int x;
         public int y;
         public int z;
 
-        public Triangle(int x, int y, int z)
+        public int[] neighbours;
+
+        public Vector3[] vertices;
+
+        public Triangle(int i, int x, int y, int z)
         {
-            this.x = x; this.y = y; this.z = z;
+            this.x = x; this.y = y; this.z = z; this.index = i;
+
+            vertices = new Vector3[3];
+
+            for (int j = 0; j < vertices.Length; j++)
+            {
+                vertices[j] = new Vector3(0, 0, 0);
+            }
+
+            neighbours = new int[3];
+            for (int j = 0; j < neighbours.Length; j++)
+            {
+                neighbours[j] = -1;
+            }
         }
     }
 
@@ -71,10 +90,7 @@ public class TerrainGen : MonoBehaviour
     {
         mesh = GetComponent<MeshFilter>().mesh;
         line = new List<string>();
-    }
 
-    private void Start()
-    {
         FileToLines();
 
         numVertices = int.Parse(line[0]);
@@ -86,16 +102,41 @@ public class TerrainGen : MonoBehaviour
 
         var j = gridSize - n - (m - 1);
         vertexArray = new Vector3[j];
-        Debug.Log(vertexArray.Length);
+        //Debug.Log(vertexArray.Length);
         uvs = new Vector2[j];
-        tris = 2 * (gridSize - (2 * n) - (2 * (m - 2)));
-        triVerts = new int[tris * 3];
-        triVerts2 = new int[tris * 3];
-        triangles = new Triangle[tris];
+        triangles = 2 * (gridSize - (2 * n) - (2 * (m - 2)));
+        triVerts = new int[triangles * 3];
+        triVerts2 = new int[triangles * 3];
+        tris = new Triangle[triangles];
 
         GenerateVerts();
         GenerateMesh();
         MeshUpdate();
+    }
+
+    private void Start()
+    {
+        //FileToLines();
+
+        //numVertices = int.Parse(line[0]);
+        //_positions = new Vector3[(numVertices / multi) + multi - 1];
+        //matrix = new Matrix4x4[1];
+        //_rp = new RenderParams(_material);
+
+        //GenerateGrid();
+
+        //var j = gridSize - n - (m - 1);
+        //vertexArray = new Vector3[j];
+        ////Debug.Log(vertexArray.Length);
+        //uvs = new Vector2[j];
+        //triangles = 2 * (gridSize - (2 * n) - (2 * (m - 2)));
+        //triVerts = new int[triangles * 3];
+        //triVerts2 = new int[triangles * 3];
+        //tris = new Triangle[triangles];
+
+        //GenerateVerts();
+        //GenerateMesh();
+        //MeshUpdate();
     }
 
     private void FileToLines()
@@ -210,7 +251,7 @@ public class TerrainGen : MonoBehaviour
                     yV += points4[i].y;
                 }
                 yV = points4.Count > 0 ? yV / points4.Count : prev;
-                Debug.Log(yV);
+                //Debug.Log(yV);
 
                 if (yV == 0)
                 {
@@ -232,22 +273,61 @@ public class TerrainGen : MonoBehaviour
         int x = n - 1;
         int y = 0;
 
-        for (int i = 0; i < tris / 2; i++)
+        for (int i = 0; i < triangles / 2; i++)
         {
             if (i == z * (y + 1) - (y + 1))
             {
                 y += 1;
             }
 
-            triangles[i] = new Triangle(i + y, i + 1 + y, z + i + 1 + y);
-            triangles[i + (tris / 2)] = new Triangle(i + y, z + i + 1 + y, z + i + y);
+            tris[i * 2] = new Triangle(i * 2, i + y, i + 1 + y, z + i + 1 + y);
+            tris[i * 2 + 1] = new Triangle(i * 2 + 1, i + y, z + i + 1 + y, z + i + y);
+
+            //Debug.Log((i + y) + " : " + (i + 1 + y) + " : " + (z + i + 1 + y));
+            //Debug.Log((i + y) + " : " + (i + z + y + 1) + " : " + (z + i + y));
         }
 
-        for (int i = 0; i < triangles.Length * 3; i += 3)
+        for (int i = 0; i < triangles / 2; i++)
         {
-            triVerts[i] = triangles[i - ((i / 3) * 2)].x;
-            triVerts[i + 1] = triangles[i - ((i / 3) * 2)].y;
-            triVerts[i + 2] = triangles[i - ((i / 3) * 2)].z;
+            tris[i * 2].neighbours[0] = i * 2 + 1;
+
+            if (i * 2 != (((z - 1) * 2) - 2) && i * 2 + 2 % (z - 1) * 2 != 0)
+                tris[i * 2].neighbours[1] = i * 2 + 3;
+            else
+                tris[i * 2].neighbours[1] = -1;
+
+            if (i * 2 - (((z - 1) * 2) - 1)! < 0)
+                tris[i * 2].neighbours[2] = i * 2 - (((z - 1) * 2) - 1);
+            else
+                tris[i * 2].neighbours[2] = -1;
+
+
+
+            tris[i * 2 + 1].neighbours[0] = i * 2;
+
+            if (i * 2 + 1 !< 0 && i * 2 - 1 % (z - 1) * 2 != 0)
+                tris[i * 2 + 1].neighbours[1] = i * 2 + 1 - 3;
+            else
+                tris[i * 2 + 1].neighbours[1] = -1;
+
+            if ((i * 2 + 1) + (((z - 1) * 2) - 1) !> triangles - 1)
+                tris[i * 2 + 1].neighbours[2] = (i * 2 + 1) + (((z - 1) * 2) - 1);
+            else
+                tris[i * 2 + 1].neighbours[2] = -1;
+        }
+
+        for (int i = 0; i < tris.Length * 3; i += 3)
+        {
+            triVerts[i] = tris[i - ((i / 3) * 2)].x;
+            triVerts[i + 1] = tris[i - ((i / 3) * 2)].y;
+            triVerts[i + 2] = tris[i - ((i / 3) * 2)].z;
+        }
+
+        for (int i = 0; i < tris.Length; i++)
+        {
+            tris[i].vertices[0] = vertexArray[triVerts[i * 3]];
+            tris[i].vertices[1] = vertexArray[triVerts[i * 3 + 1]];
+            tris[i].vertices[2] = vertexArray[triVerts[i * 3 + 2]];
         }
     }
 
