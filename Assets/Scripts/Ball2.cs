@@ -5,20 +5,18 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Ball : MonoBehaviour
+public class Ball2 : MonoBehaviour
 {
     private float g = -9.81f;
-    private float m = 0.1f;
+    private float m = 0.2f;
     private float G;
 
     private int startTri;
     private int n1;
     private int n2;
     private int n3;
-    private int tri;
-
-    private List<int> triangles;
-    private List<int> used;
+    private int tri = -2;
+    private int prevTri;
 
     private Vector3 curVel;
     private Vector3 newVel;
@@ -28,7 +26,7 @@ public class Ball : MonoBehaviour
     private Vector3 N;
     private Vector3 prevN;
 
-    public GameObject pointGen;
+    public GameObject triGen;
     private TerrainGen genScript;
 
     private Vector3 pos;
@@ -42,17 +40,15 @@ public class Ball : MonoBehaviour
         G = m * g;
         curVel = new Vector3(0f, G, 0f);
         acceleration = new Vector3(0f, G, 0f);
-        genScript = pointGen.GetComponent("TerrainGen") as TerrainGen;
-
-        triangles = new List<int>();
-        used = new List<int>();
+        genScript = triGen.GetComponent("TerrainGen") as TerrainGen;
 
     }
 
     private void Start()
     {
-        startTri = WhatTriStart();
+        //startTri = WhatTriStart();
     }
+
     private void FixedUpdate()
     {
         time += Time.fixedDeltaTime;
@@ -70,11 +66,9 @@ public class Ball : MonoBehaviour
     private Vector3 calcPos()
     {
         //Debug.Log(WhatTri());
-        newVel = curVel + acceleration * Time.fixedDeltaTime;
+        tri = WhatTri();
 
-        if (startTri != -1)
-            tri = WhatTri();
-        else tri = -1;
+        newVel = curVel + acceleration * Time.fixedDeltaTime;
 
         if (tri != -1)
         {
@@ -101,7 +95,7 @@ public class Ball : MonoBehaviour
     private bool Grounded()
     {
         Vector3 P = transform.position;
-        float r = 0.02f;
+        float r = 0.5f;
         Vector3 C = genScript.tris[tri].vertices[0];
         Vector3 norm = Normal(genScript.tris[tri].vertices[0], genScript.tris[tri].vertices[1], genScript.tris[tri].vertices[2]);
         Vector3 y = Vector3.Dot(P - C, norm) * norm;
@@ -113,12 +107,44 @@ public class Ball : MonoBehaviour
             return false;
     }
 
-    private int WhatTriStart()
+    private int WhatTri()
     {
-        //Debug.Log(genScript.triCount);
+        if (tri > -1)
+        {
+            n1 = genScript.tris[tri].neighbours[0];
+            n2 = genScript.tris[tri].neighbours[1];
+            n3 = genScript.tris[tri].neighbours[2];
+
+            if (inTri(genScript.tris[tri].vertices[0], genScript.tris[tri].vertices[1], genScript.tris[tri].vertices[2], transform.position))
+            {
+                return tri;
+            }
+            if (n1 != -1)
+            {
+                if (inTri(genScript.tris[n1].vertices[0], genScript.tris[n1].vertices[1], genScript.tris[n1].vertices[2], transform.position))
+                {
+                    return n1;
+                }
+            }
+            if (n2 != -1)
+            {
+                if (inTri(genScript.tris[n2].vertices[0], genScript.tris[n2].vertices[1], genScript.tris[n2].vertices[2], transform.position))
+                {
+                    return n2;
+                }
+            }
+            if (n3 != -1)
+            {
+                if (inTri(genScript.tris[n3].vertices[0], genScript.tris[n3].vertices[1], genScript.tris[n3].vertices[2], transform.position))
+                {
+                    return n3;
+                }
+            }
+        }
+
         for (int i = 0; i < genScript.tris.Length; i++)
         {
-            if (inTri(genScript.vertexArray[genScript.tris[i].x], genScript.vertexArray[genScript.tris[i].y], genScript.vertexArray[genScript.tris[i].z], transform.position))
+            if (inTri(genScript.tris[i].vertices[0], genScript.tris[i].vertices[1], genScript.tris[i].vertices[2], transform.position))
             {
                 Debug.Log(i);
                 return i;
@@ -128,96 +154,71 @@ public class Ball : MonoBehaviour
         return -1;
     }
 
-    private int WhatTri()
-    {
-        //Debug.Log(genScript.tris[startTri].vertices[0] + " : " + genScript.tris[startTri].vertices[1] + " : " + genScript.tris[startTri].vertices[2]);
-        Debug.Log(startTri);
-        if (inTri(genScript.vertexArray[genScript.tris[startTri].x], genScript.vertexArray[genScript.tris[startTri].y], genScript.vertexArray[genScript.tris[startTri].z], transform.position))
-        {
-            return startTri;
-        }
+    //private int WhatTriStart()
+    //{
+    //    //Debug.Log(genScript.triCount);
+    //    for (int i = 0; i < genScript.tris.Length; i++)
+    //    {
+    //        if (inTri(genScript.tris[i].vertices[0], genScript.tris[i].vertices[1], genScript.tris[i].vertices[2], transform.position))
+    //        {
+    //            Debug.Log(i);
+    //            return i;
+    //        }
+    //        else continue;
+    //    }
+    //    return -1;
+    //}
 
-        //n1 = genScript.tris[startTri].neighbours[0];
-        //n2 = genScript.tris[startTri].neighbours[1];
-        //n3 = genScript.tris[startTri].neighbours[2];
+    //private int WhatTri()
+    //{
+    //    if (inTri(genScript.tris[startTri].vertices[0], genScript.tris[startTri].vertices[1], genScript.tris[startTri].vertices[2], transform.position))
+    //    {
+    //        return startTri;
+    //    }
+    //    else
+    //    {
+    //        n1 = genScript.tris[startTri].neighbours[0];
+    //        n2 = genScript.tris[startTri].neighbours[1];
+    //        n3 = genScript.tris[startTri].neighbours[2];
 
-        int nTri = -1;
-        triangles.Add(startTri);
+    //        if (n1 != -1)
+    //        {
+    //            if (inTri(genScript.tris[n1].vertices[0], genScript.tris[n1].vertices[1], genScript.tris[n1].vertices[2], transform.position))
+    //            {
+    //                startTri = n1;
+    //                return n1;
+    //            }
+    //        }
+    //        if (n2 != -1)
+    //        {
+    //            if (inTri(genScript.tris[n2].vertices[0], genScript.tris[n2].vertices[1], genScript.tris[n2].vertices[2], transform.position))
+    //            {
+    //                startTri = n2;
+    //                return n2;
+    //            }
+    //        }
+    //        if (n3 != -1)
+    //        {
+    //            if (inTri(genScript.tris[n3].vertices[0], genScript.tris[n3].vertices[1], genScript.tris[n3].vertices[2], transform.position))
+    //            {
+    //                startTri = n3;
+    //                return n3;
+    //            }
+    //        }
+    //    }
 
-        while (nTri == -1)
-        {
-            if (triangles.Count < 1)
-            {
-                return -1;
-            }
-            Debug.Log("Tris : " + triangles.Count + "Used : " + used.Count);
-            if (used.Count > 0)
-            {
-                for (int i = 0; i < triangles.Count; i++)
-                {
-                    for (int j = 0; j < used.Count; j++)
-                    {
-                        Debug.Log("Tris : " + triangles.Count + "Used : " + used.Count);
-                        if (triangles[i] == used[j])
-                        {
-                            triangles.RemoveAt(i);
-                        }
-                    }
-                }
-            }
 
-
-            n1 = genScript.tris[triangles[0]].neighbours[0];
-            n2 = genScript.tris[triangles[0]].neighbours[1];
-            n3 = genScript.tris[triangles[0]].neighbours[2];
-
-            used.Add(triangles[0]);
-
-            nTri = neighbourCheck();
-
-            if (nTri != -1)
-            {
-                startTri = nTri;
-                triangles.Clear();
-                used.Clear();
-                return startTri;
-            }
-        }
-
-        return -1;
-    }
-
-    private int neighbourCheck()
-    {
-        triangles.RemoveAt(0);
-
-        if (n1 != -1)
-        {
-            if (inTri(genScript.vertexArray[genScript.tris[startTri].x], genScript.vertexArray[genScript.tris[startTri].y], genScript.vertexArray[genScript.tris[startTri].z], transform.position))
-            {
-                return n1;
-            }
-            triangles.Add(n1);
-        }
-        if (n2 != -1)
-        {
-            if (inTri(genScript.vertexArray[genScript.tris[startTri].x], genScript.vertexArray[genScript.tris[startTri].y], genScript.vertexArray[genScript.tris[startTri].z], transform.position))
-            {
-                return n2;
-            }
-            triangles.Add(n2);
-        }
-        if (n3 != -1)
-        {
-            if (inTri(genScript.vertexArray[genScript.tris[startTri].x], genScript.vertexArray[genScript.tris[startTri].y], genScript.vertexArray[genScript.tris[startTri].z], transform.position))
-            {
-                return n3;
-            }
-            triangles.Add(n3);
-        }
-
-        return -1;
-    }
+    //    for (int i = 0; i < genScript.tris.Length; i++)
+    //    {
+    //        if (inTri(genScript.tris[i].vertices[0], genScript.tris[i].vertices[1], genScript.tris[i].vertices[2], transform.position))
+    //        {
+    //            startTri = i;
+    //            return i;
+    //        }
+    //        else continue;
+    //    }
+    //    return -1;
+    //}
 
     public bool inTri(Vector3 A, Vector3 B, Vector3 C, Vector3 P)
     {
@@ -228,29 +229,20 @@ public class Ball : MonoBehaviour
         Vector3 vCrossW = Vector3.Cross(v, w);
         Vector3 vCrossU = Vector3.Cross(v, u);
 
-        //if (Vector3.Dot(vCrossW, vCrossU) < 0)
-        //    return false;
+        if (Vector3.Dot(vCrossW, vCrossU) < 0)
+            return false;
 
         Vector3 uCrossW = Vector3.Cross(u, w);
         Vector3 uCrossV = Vector3.Cross(u, v);
 
-        //if (Vector3.Dot(uCrossW, uCrossV) < 0)
-        //    return false;
+        if (Vector3.Dot(uCrossW, uCrossV) < 0)
+            return false;
 
         float denom = uCrossV.magnitude;
         float r = vCrossW.magnitude / denom;
         float t = uCrossW.magnitude / denom;
 
         return (r >= 0 && t >= 0 && r + t <= 1);
-
-        //double s1 = C.z - A.z;
-        //double s2 = C.x - A.x;
-        //double s3 = B.z - A.z;
-        //double s4 = P.z - A.z;
-
-        //double w1 = (A.x * s1 + s4 * s2 - P.x * s1) / (s3 * s2 - (B.x - A.x) * s1);
-        //double w2 = (s4 - w1 * s3) / s1;
-        //return w1 >= 0 && w2 >= 0 && (w1 + w2) <= 1;
     }
 
     public Vector3 baryCoords(Vector3 A, Vector3 B, Vector3 C, Vector3 P)
@@ -258,7 +250,7 @@ public class Ball : MonoBehaviour
         Vector3 u = B - A;
         Vector3 v = C - A;
         Vector3 w = P - A;
-       
+
         Vector3 vCrossW = Vector3.Cross(v, w);
         Vector3 vCrossU = Vector3.Cross(v, u);
 
