@@ -12,6 +12,9 @@ public class Raindrop : MonoBehaviour
     private float G;
     private float F = 0.01f;
 
+    private Vector3[] ControlPoints;
+    private int round = 1;
+
     private int startTri;
     private int n1;
     private int n2;
@@ -28,6 +31,8 @@ public class Raindrop : MonoBehaviour
 
     //public GameObject triGen;
     public TerrainGen genScript;
+    public BSpline SplineScript;
+    public GameObject BSpline;
 
     private Vector3 pos;
     float time;
@@ -41,18 +46,40 @@ public class Raindrop : MonoBehaviour
         curVel = new Vector3(0f, G, 0f);
         acceleration = new Vector3(0f, G, 0f);
         //genScript = triGen.GetComponent("TerrainGen") as TerrainGen;
+        //splineScript = gameObject.GetComponent("BSpline") as BSpline;
 
+        ControlPoints = new Vector3[3];
     }
 
     private void Start()
     {
         tri = WhatTriStart();
         if (tri < 0 ) Destroy(gameObject);
+        ControlPoints[0] = transform.position;
     }
 
     private void FixedUpdate()
     {
         time += Time.fixedDeltaTime;
+
+        if (time > 1f)
+        {
+            ControlPoints[round]= transform.position;
+            round += 1;
+            if (round > 2)
+            {
+                GameObject BSplineInst = Instantiate(BSpline, new Vector3(0, 0, 0), Quaternion.identity);
+                SplineScript = BSplineInst.GetComponent("BSpline") as BSpline;
+                SplineScript.P0 = ControlPoints[0];
+                SplineScript.P1 = ControlPoints[1];
+                SplineScript.P2 = ControlPoints[2];
+                SplineScript.DrawQuadraticBSpline();
+                ControlPoints[0] = transform.position;
+                round = 1;
+            }
+
+            time = 0f;
+        }
 
         if ( !check )
         {
@@ -79,12 +106,6 @@ public class Raindrop : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        //if (time > 2f && check == false)
-        //{
-        //    Debug.Log("NormalVektor : " + Vector3.Dot(Normal(genScript.tris[WhatTri()].vertices[0], genScript.tris[WhatTri()].vertices[1], genScript.tris[WhatTri()].vertices[2]), -newVel) * Normal(genScript.tris[WhatTri()].vertices[0], genScript.tris[WhatTri()].vertices[1], genScript.tris[WhatTri()].vertices[2]) + "Akselerasjon : " + acceleration + "Hastighet : " + newVel + "Posisjon i trekant : " + baryCoords(genScript.tris[WhatTri()].vertices[0], genScript.tris[WhatTri()].vertices[1], genScript.tris[WhatTri()].vertices[2], transform.position));
-        //    check = true;
-        //}
         //Debug.Log(curVel.ToString());
     }
 
@@ -105,7 +126,7 @@ public class Raindrop : MonoBehaviour
 
         }
         //Debug.Log("2 : " + newVel);
-        Debug.DrawRay(transform.position, N * 2000f, Color.red);
+        //Debug.DrawRay(transform.position, N * 2000f, Color.red);
         if (tri > -1)
         {
             if (Grounded())
@@ -124,6 +145,7 @@ public class Raindrop : MonoBehaviour
     {
         Vector3 P = transform.position;
         float r = 0.5f;
+        if (tri < 0) return false;
         Vector3 C = genScript.tris[tri].vertices[0];
         Vector3 norm = Normal(genScript.tris[tri].vertices[0], genScript.tris[tri].vertices[1], genScript.tris[tri].vertices[2]);
         Vector3 y = Vector3.Dot(P - C, norm) * norm;

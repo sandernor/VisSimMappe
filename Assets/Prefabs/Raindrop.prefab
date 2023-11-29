@@ -97,3 +97,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   genScript: {fileID: 0}
+  SplineScript: {fileID: 0}
+  BSpline: {fileID: 5109498848869305044, guid: 82959ad3226042a49a5aa207d8c5c35f, type: 3}

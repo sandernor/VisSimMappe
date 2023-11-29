@@ -289,7 +289,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b226f040696c7f4eb112813f9c78416, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prodRate: 0
   raindrop: {fileID: 8429347054791876190, guid: d58df7118acbfd943baa7fd6d68f0bec, type: 3}
   triGen: {fileID: 1395056459}
   rainScript: {fileID: 0}

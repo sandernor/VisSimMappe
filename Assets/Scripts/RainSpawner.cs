@@ -5,7 +5,7 @@ using UnityEngine;
 public class RainSpawner : MonoBehaviour
 {
     Vector2 genBox;
-    [SerializeField] int prodRate;
+    private int prodRate;
     public GameObject raindrop;
     public GameObject triGen;
     public Raindrop rainScript;
