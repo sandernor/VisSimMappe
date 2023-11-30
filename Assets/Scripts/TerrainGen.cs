@@ -43,6 +43,8 @@ public class TerrainGen : MonoBehaviour
 
     private float Res = 25f;
 
+    private float lowV = 1000f;
+
     private float[] xArr;
     private float[] zArr;
     private int[] triVerts;
@@ -183,12 +185,11 @@ public class TerrainGen : MonoBehaviour
             {
                 zMin = z;
             }
+            if (y < lowV)
+                lowV = y;
         }
 
-        v0 = new Vector3(xMax, 0.0f, zMax);
-        v1 = new Vector3(xMax, 0.0f, zMin);
-        v2 = new Vector3(xMin, 0.0f, zMax);
-        v3 = new Vector3(xMin, 0.0f, zMin);
+        lowV -= yMax2;
 
         n = Mathf.CeilToInt((xMax - xMin) / Res);
         xArr = new float[n]; // + 1 ?
@@ -219,7 +220,7 @@ public class TerrainGen : MonoBehaviour
     {
         int index = 0;
         float yV = 0;
-        float prev = 0;
+        float prev = 30f;
 
         List<Vector3> points4;
         points4 = new List<Vector3>();
@@ -238,7 +239,7 @@ public class TerrainGen : MonoBehaviour
                     y = float.Parse(splitLine[2]);
 
                     v = new Vector3(x - xMax2, y - yMax2, z - zMax2);
-
+                    //v = new Vector3(x - xMax2, y, z - zMax2);
 
                     if (v.x > xArr[k] && v.x < xArr[k + 1] && v.z > zArr[l] && v.z < zArr[l + 1])
                     {
@@ -250,18 +251,26 @@ public class TerrainGen : MonoBehaviour
                 {
                     yV += points4[i].y;
                 }
-                yV = points4.Count > 0 ? yV / points4.Count : prev;
+                yV = points4.Count > 0f ? yV / points4.Count : prev;
                 //Debug.Log(yV);
 
                 if (yV == 0)
                 {
                     yV = prev;
                 }
+
+                //float y2 = yV;
+                //y2 -= yMax2;
+
+                //if (y2 < lowV + 5f)
+                //    y2 += -5f;
+
                 vertexArray[index] = new Vector3(xArr[k] + (Res / 2), yV, zArr[l] + (Res / 2));
 
                 index++;
                 points4.Clear();
-                prev = yV;
+                if (yV != 0)
+                    prev = yV;
                 yV = 0;
             }
         }
@@ -333,11 +342,29 @@ public class TerrainGen : MonoBehaviour
 
         for (int i = 0; i < tris.Length; i++)
         {
+            //if (vertexArray[triVerts[i * 3]].y < (lowV + 5f))
+            //    vertexArray[triVerts[i * 3]].y += -20f;
+
+            //if (vertexArray[triVerts[i * 3 + 1]].y < (lowV + 5f))
+            //    vertexArray[triVerts[i * 3 + 1]].y += -20f;
+
+            //if (vertexArray[triVerts[i * 3 + 2]].y < (lowV + 5f))
+            //    vertexArray[triVerts[i * 3 + 2]].y += -20f;
+
+            if (vertexArray[triVerts[i * 3]].y < -96f)
+                vertexArray[triVerts[i * 3]].y += -5f;
+
+            if (vertexArray[triVerts[i * 3 + 1]].y < -96f)
+                vertexArray[triVerts[i * 3 + 1]].y += -5f;
+
+            if (vertexArray[triVerts[i * 3 + 2]].y < -96f)
+                vertexArray[triVerts[i * 3 + 2]].y += -5f;
+
             tris[i].vertices[0] = vertexArray[triVerts[i * 3]];
             tris[i].vertices[1] = vertexArray[triVerts[i * 3 + 1]];
             tris[i].vertices[2] = vertexArray[triVerts[i * 3 + 2]];
 
-            Debug.Log(tris[i].vertices[0] + " : " + tris[i].vertices[1] + " : " + tris[i].vertices[2]);
+            //Debug.Log(tris[i].vertices[0] + " : " + tris[i].vertices[1] + " : " + tris[i].vertices[2]);
         }
     }
 

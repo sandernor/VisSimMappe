@@ -120,7 +120,7 @@ public class Ball : MonoBehaviour
         {
             if (inTri(genScript.vertexArray[genScript.tris[i].x], genScript.vertexArray[genScript.tris[i].y], genScript.vertexArray[genScript.tris[i].z], transform.position))
             {
-                Debug.Log(i);
+                //Debug.Log(i);
                 return i;
             }
             else continue;
@@ -131,7 +131,7 @@ public class Ball : MonoBehaviour
     private int WhatTri()
     {
         //Debug.Log(genScript.tris[startTri].vertices[0] + " : " + genScript.tris[startTri].vertices[1] + " : " + genScript.tris[startTri].vertices[2]);
-        Debug.Log(startTri);
+        //Debug.Log(startTri);
         if (inTri(genScript.vertexArray[genScript.tris[startTri].x], genScript.vertexArray[genScript.tris[startTri].y], genScript.vertexArray[genScript.tris[startTri].z], transform.position))
         {
             return startTri;
@@ -150,14 +150,14 @@ public class Ball : MonoBehaviour
             {
                 return -1;
             }
-            Debug.Log("Tris : " + triangles.Count + "Used : " + used.Count);
+            //Debug.Log("Tris : " + triangles.Count + "Used : " + used.Count);
             if (used.Count > 0)
             {
                 for (int i = 0; i < triangles.Count; i++)
                 {
                     for (int j = 0; j < used.Count; j++)
                     {
-                        Debug.Log("Tris : " + triangles.Count + "Used : " + used.Count);
+                        //Debug.Log("Tris : " + triangles.Count + "Used : " + used.Count);
                         if (triangles[i] == used[j])
                         {
                             triangles.RemoveAt(i);

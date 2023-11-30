@@ -32,7 +32,6 @@ public class CamMovement : MonoBehaviour
         camX = Input.GetAxis("Mouse X") * Time.deltaTime * sens;
         camY = Input.GetAxis("Mouse Y") * Time.deltaTime * sens;
         transform.Rotate(0, camX, 0);
-        //transform.Rotate(-camY, 0, 0);
         cam.transform.Rotate(-camY, 0, 0);
         transform.Translate(x, y, z);
     }

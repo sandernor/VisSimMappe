@@ -28,6 +28,8 @@ public class Ball2 : MonoBehaviour
 
     public GameObject triGen;
     private TerrainGen genScript;
+    public GameObject Water;
+    public Water WaterScript;
 
     private Vector3 pos;
     float time;
@@ -47,6 +49,8 @@ public class Ball2 : MonoBehaviour
     private void Start()
     {
         //startTri = WhatTriStart();
+        Water = GameObject.Find("Water");
+        WaterScript = Water.GetComponent("Water") as Water;
     }
 
     private void FixedUpdate()
@@ -54,6 +58,9 @@ public class Ball2 : MonoBehaviour
         time += Time.fixedDeltaTime;
 
         transform.position += calcPos();
+
+        if (transform.position.y < WaterScript.height)
+            transform.position = new Vector3(transform.position.x, WaterScript.height, transform.position.z);
 
         //if (time > 2f && check == false)
         //{
@@ -146,7 +153,7 @@ public class Ball2 : MonoBehaviour
         {
             if (inTri(genScript.tris[i].vertices[0], genScript.tris[i].vertices[1], genScript.tris[i].vertices[2], transform.position))
             {
-                Debug.Log(i);
+                //Debug.Log(i);
                 return i;
             }
             else continue;

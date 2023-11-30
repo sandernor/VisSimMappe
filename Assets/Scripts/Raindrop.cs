@@ -33,6 +33,9 @@ public class Raindrop : MonoBehaviour
     public TerrainGen genScript;
     public BSpline SplineScript;
     public GameObject BSpline;
+    public GameObject Water;
+    public Water WaterScript;
+    public GameObject PointGen;
 
     private Vector3 pos;
     float time;
@@ -45,7 +48,7 @@ public class Raindrop : MonoBehaviour
         G = m * g;
         curVel = new Vector3(0f, G, 0f);
         acceleration = new Vector3(0f, G, 0f);
-        //genScript = triGen.GetComponent("TerrainGen") as TerrainGen;
+        
         //splineScript = gameObject.GetComponent("BSpline") as BSpline;
 
         ControlPoints = new Vector3[3];
@@ -55,14 +58,18 @@ public class Raindrop : MonoBehaviour
     {
         tri = WhatTriStart();
         if (tri < 0 ) Destroy(gameObject);
-        ControlPoints[0] = transform.position;
+
+        Water = GameObject.Find("Water");
+        WaterScript = Water.GetComponent("Water") as Water;
+        PointGen = GameObject.Find("PointGen");
+        genScript = PointGen.GetComponent("TerrainGen") as TerrainGen;
     }
 
     private void FixedUpdate()
     {
         time += Time.fixedDeltaTime;
 
-        if (time > 1f)
+        if (time > 1f && check)
         {
             ControlPoints[round]= transform.position;
             round += 1;
@@ -70,9 +77,11 @@ public class Raindrop : MonoBehaviour
             {
                 GameObject BSplineInst = Instantiate(BSpline, new Vector3(0, 0, 0), Quaternion.identity);
                 SplineScript = BSplineInst.GetComponent("BSpline") as BSpline;
+                SplineScript.genScript = genScript;
                 SplineScript.P0 = ControlPoints[0];
                 SplineScript.P1 = ControlPoints[1];
                 SplineScript.P2 = ControlPoints[2];
+                SplineScript.tri = tri;
                 SplineScript.DrawQuadraticBSpline();
                 ControlPoints[0] = transform.position;
                 round = 1;
@@ -85,6 +94,7 @@ public class Raindrop : MonoBehaviour
         {
             if (Grounded())
             {
+                ControlPoints[0] = transform.position;
                 check = true;
             }
             else
@@ -102,8 +112,10 @@ public class Raindrop : MonoBehaviour
             transform.position += calcPos();
         }
 
-        if (transform.position.y < -100f) 
+        if (transform.position.y < -300f || transform.position.y < Water.transform.position.y) 
         {
+            if (transform.position.y < Water.transform.position.y)
+                WaterScript.height += 0.5f;
             Destroy(gameObject);
         }
         //Debug.Log(curVel.ToString());
@@ -114,8 +126,8 @@ public class Raindrop : MonoBehaviour
         //Debug.Log(WhatTri());
         tri = WhatTri();
 
-        curVel.x = curVel.x * (1f - F);
-        curVel.z = curVel.z * (1f - F);
+        //curVel.x = curVel.x * (1f - F);
+        //curVel.z = curVel.z * (1f - F);
 
         newVel = curVel + acceleration * Time.fixedDeltaTime;
 
@@ -192,16 +204,17 @@ public class Raindrop : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < genScript.tris.Length; i++)
-        {
-            if (inTri(genScript.tris[i].vertices[0], genScript.tris[i].vertices[1], genScript.tris[i].vertices[2], transform.position))
-            {
-                Debug.Log(i);
-                return i;
-            }
-            else continue;
-        }
-        return -1;
+        //for (int i = 0; i < genScript.tris.Length; i++)
+        //{
+        //    if (inTri(genScript.tris[i].vertices[0], genScript.tris[i].vertices[1], genScript.tris[i].vertices[2], transform.position))
+        //    {
+        //        //Debug.Log(i);
+        //        return i;
+        //    }
+        //    else continue;
+        //}
+
+        return WhatTriStart();
     }
 
     private int WhatTriStart()
@@ -210,7 +223,6 @@ public class Raindrop : MonoBehaviour
         {
             if (inTriStart(genScript.tris[i].vertices[0], genScript.tris[i].vertices[1], genScript.tris[i].vertices[2], transform.position))
             {
-                Debug.Log(i);
                 return i;
             }
             else continue;

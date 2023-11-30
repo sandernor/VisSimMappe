@@ -59,7 +59,6 @@ public class GPUInstancing : MonoBehaviour
         for (int i = 0; i < lineCount; i++)
         {
             line.Add(file2.ReadLine());
-            //Debug.Log("Linje " + i + " : " + line[i]);
         }
     }
 
@@ -74,22 +73,18 @@ public class GPUInstancing : MonoBehaviour
             z = float.Parse(splitLine[1]);
             y = float.Parse(splitLine[2]);
 
-            if (y > 505f)
-            {
-                v = new Vector3(x - xMax, y - yMax, z - zMax);
-                Debug.Log("i = " + i / multi);
-                _positions[i / multi] = v;
-            }
+            v = new Vector3(x - xMax, y - yMax, z - zMax);
+            _positions[i / multi] = v;
+        }
+
+        for (var i = 0; i < _positions.Length; i++)
+        {
+            _matrices[i].SetTRS(_positions[i], Quaternion.identity, new Vector3(scale, scale, scale));
         }
     }
 
     private void Update()
     {
-        for (var i = 0; i < _positions.Length; i++)
-        {
-            _matrices[i].SetTRS(_positions[i], Quaternion.identity, new Vector3(scale, scale, scale));
-        }
-
         Graphics.RenderMeshInstanced(_rp, _mesh, 0, _matrices);
     }
 }
