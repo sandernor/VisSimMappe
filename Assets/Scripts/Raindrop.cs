@@ -123,7 +123,6 @@ public class Raindrop : MonoBehaviour
 
     private Vector3 calcPos()
     {
-        //Debug.Log(WhatTri());
         tri = WhatTri();
 
         //curVel.x = curVel.x * (1f - F);
@@ -137,14 +136,11 @@ public class Raindrop : MonoBehaviour
             prevN = N;
 
         }
-        //Debug.Log("2 : " + newVel);
-        //Debug.DrawRay(transform.position, N * 2000f, Color.red);
         if (tri > -1)
         {
             if (Grounded())
             {
                 newVel = newVel + N;
-                //Debug.Log("1 : " + newVel);
             }
         }
         

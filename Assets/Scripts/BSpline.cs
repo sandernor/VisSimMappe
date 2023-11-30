@@ -48,9 +48,9 @@ public class BSpline : MonoBehaviour
         float tt = t * t;
         float uu = u * u;
 
-        Vector3 p = uu * P0; // (1-t)^2 * p0
-        p += 2 * u * t * P1; // 2 * (1-t) * t * p1
-        p += tt * P2; // t^2 * p2
+        Vector3 p = uu * P0; 
+        p += 2 * u * t * P1; 
+        p += tt * P2; 
 
         //if (tri > -1)
         //{

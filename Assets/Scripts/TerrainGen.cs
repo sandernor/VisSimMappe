@@ -213,7 +213,7 @@ public class TerrainGen : MonoBehaviour
                 zArr[i] = zMax - zMax2;
         }
 
-        gridSize = n * m;
+        gridSize = (n) * (m);
     }
 
     private void GenerateVerts()
@@ -239,7 +239,6 @@ public class TerrainGen : MonoBehaviour
                     y = float.Parse(splitLine[2]);
 
                     v = new Vector3(x - xMax2, y - yMax2, z - zMax2);
-                    //v = new Vector3(x - xMax2, y, z - zMax2);
 
                     if (v.x > xArr[k] && v.x < xArr[k + 1] && v.z > zArr[l] && v.z < zArr[l + 1])
                     {
@@ -252,18 +251,11 @@ public class TerrainGen : MonoBehaviour
                     yV += points4[i].y;
                 }
                 yV = points4.Count > 0f ? yV / points4.Count : prev;
-                //Debug.Log(yV);
 
                 if (yV == 0)
                 {
                     yV = prev;
                 }
-
-                //float y2 = yV;
-                //y2 -= yMax2;
-
-                //if (y2 < lowV + 5f)
-                //    y2 += -5f;
 
                 vertexArray[index] = new Vector3(xArr[k] + (Res / 2), yV, zArr[l] + (Res / 2));
 
@@ -299,9 +291,6 @@ public class TerrainGen : MonoBehaviour
             triVerts[i * 6 + 3] = i + y;
             triVerts[i * 6 + 4] = z + i + 1 + y;
             triVerts[i * 6 + 5] = z + i + y;
-
-            //Debug.Log((i + y) + " : " + (i + 1 + y) + " : " + (z + i + 1 + y));
-            //Debug.Log((i + y) + " : " + (i + z + y + 1) + " : " + (z + i + y));
         }
 
         for (int i = 0; i < triangles / 2; i++)
@@ -333,24 +322,8 @@ public class TerrainGen : MonoBehaviour
                 tris[i * 2 + 1].neighbours[2] = -1;
         }
 
-        //for (int i = 0; i < tris.Length * 3; i += 3)
-        //{
-        //    triVerts[i] = tris[i - ((i / 3) * 2)].x;
-        //    triVerts[i + 1] = tris[i - ((i / 3) * 2)].y;
-        //    triVerts[i + 2] = tris[i - ((i / 3) * 2)].z;
-        //}
-
         for (int i = 0; i < tris.Length; i++)
         {
-            //if (vertexArray[triVerts[i * 3]].y < (lowV + 5f))
-            //    vertexArray[triVerts[i * 3]].y += -20f;
-
-            //if (vertexArray[triVerts[i * 3 + 1]].y < (lowV + 5f))
-            //    vertexArray[triVerts[i * 3 + 1]].y += -20f;
-
-            //if (vertexArray[triVerts[i * 3 + 2]].y < (lowV + 5f))
-            //    vertexArray[triVerts[i * 3 + 2]].y += -20f;
-
             if (vertexArray[triVerts[i * 3]].y < -96f)
                 vertexArray[triVerts[i * 3]].y += -5f;
 
@@ -363,8 +336,6 @@ public class TerrainGen : MonoBehaviour
             tris[i].vertices[0] = vertexArray[triVerts[i * 3]];
             tris[i].vertices[1] = vertexArray[triVerts[i * 3 + 1]];
             tris[i].vertices[2] = vertexArray[triVerts[i * 3 + 2]];
-
-            //Debug.Log(tris[i].vertices[0] + " : " + tris[i].vertices[1] + " : " + tris[i].vertices[2]);
         }
     }
 
@@ -408,14 +379,12 @@ public class TerrainGen : MonoBehaviour
     {
         for (int i = 0; i < vertexArray.Length; i++)
         {
-            uvs[i] = new Vector2((vertexArray[i].x / (xMax - xMin)) * Res, (vertexArray[i].z / (zMax - zMin)) * Res);
-            //vertexArray[i] *= 0.5f;   
+            uvs[i] = new Vector2((vertexArray[i].x / (xMax - xMin)) * Res, (vertexArray[i].z / (zMax - zMin)) * Res); 
         }
         mesh.Clear();
         mesh.vertices = vertexArray;
         mesh.triangles = triVerts;
         mesh.uv = uvs;
         mesh.normals = CalcVNormals();
-
     }
 }

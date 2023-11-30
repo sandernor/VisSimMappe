@@ -19,7 +19,7 @@ public class Ball2 : MonoBehaviour
     private int prevTri;
 
     private Vector3 curVel;
-    private Vector3 newVel;
+    public Vector3 newVel;
     private Vector3 acceleration;
     private Vector3 newPos;
     private Vector3 prevPos;
@@ -30,6 +30,8 @@ public class Ball2 : MonoBehaviour
     private TerrainGen genScript;
     public GameObject Water;
     public Water WaterScript;
+    public GameObject Ball;
+    public Ball2 BallScript;
 
     private Vector3 pos;
     float time;
@@ -51,6 +53,8 @@ public class Ball2 : MonoBehaviour
         //startTri = WhatTriStart();
         Water = GameObject.Find("Water");
         WaterScript = Water.GetComponent("Water") as Water;
+        Ball = GameObject.Find("Ball");
+        BallScript = Ball.GetComponent("Ball2") as Ball2;
     }
 
     private void FixedUpdate()
@@ -62,12 +66,16 @@ public class Ball2 : MonoBehaviour
         if (transform.position.y < WaterScript.height)
             transform.position = new Vector3(transform.position.x, WaterScript.height, transform.position.z);
 
-        //if (time > 2f && check == false)
-        //{
-        //    Debug.Log("NormalVektor : " + Vector3.Dot(Normal(genScript.tris[WhatTri()].vertices[0], genScript.tris[WhatTri()].vertices[1], genScript.tris[WhatTri()].vertices[2]), -newVel) * Normal(genScript.tris[WhatTri()].vertices[0], genScript.tris[WhatTri()].vertices[1], genScript.tris[WhatTri()].vertices[2]) + "Akselerasjon : " + acceleration + "Hastighet : " + newVel + "Posisjon i trekant : " + baryCoords(genScript.tris[WhatTri()].vertices[0], genScript.tris[WhatTri()].vertices[1], genScript.tris[WhatTri()].vertices[2], transform.position));
-        //    check = true;
-        //}
-        //Debug.Log(curVel.ToString());
+        Collision();
+    }
+
+    private void Collision()
+    {
+        Vector3 dist = transform.position - Ball.transform.position;
+        if (dist.magnitude < 0.5f)
+        {
+            newVel += dist * BallScript.newVel.magnitude;
+        }
     }
 
     private Vector3 calcPos()
